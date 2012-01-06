@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python2.7
 
 #MineBot
 #GPL and all that
@@ -7,6 +7,8 @@
 
 import urllib
 import logging
+from sys import argv
+from getpass import getpass
 
 from twisted.internet import reactor
 from twisted.python import log
@@ -18,12 +20,10 @@ from settings import *
 
 #twisted idiom fail, yeah
 def main():
-    logging.basicConfig(filename="client.log", level=logging.DEBUG)
-    observer = log.PythonLoggingObserver()
-    observer.start()
+    logging.basicConfig(filename="client.log", level=logging.CRITICAL)
+    #observer = log.PythonLoggingObserver()
+    #observer.start()
     
-    from sys import argv
-    from getpass import getpass
     
     loginname = argv[1]
     server = argv[2]
@@ -38,13 +38,19 @@ def main():
     
         logging.info("Logging in")
         params = urllib.urlencode({'user': loginname, 'password': password, 'version': 9001})
-        handler = urllib.urlopen("http://www.minecraft.net/game/getversion.jsp", params)
+        handler = urllib.urlopen("http://login.minecraft.net/", params)
         ret = handler.read()
-        if ret == "Bad login":
+        logging.debug(ret)
+        if ret == "Bad login1":
             logging.error(ret)
             return -1
     
-        version, downloadTicket, username, sessionId, _ = ret.split(":")
+        version, downloadTicket, username, sessionId= ret.split(":")
+
+#        version = 22
+#        downloadTicket = ""
+#        username = "grotiiy"
+#        sessionId = 1111
         logging.info("Got %r %r %r %r" % (version, downloadTicket, username, sessionId))
         
         if not botname: botname = username
@@ -55,7 +61,10 @@ def main():
     interfaceNamespace = {}
     
     f = BotFactory(username, sessionId, botname, interfaceNamespace)
+    logging.info("tcptwisted")
     reactor.connectTCP(server, port, f)
+    logging.info("tcptwisted")
+
    
     if ENABLE_CONSOLE:
         #start with a null oberserver to remove DefaultObserver

@@ -1,3 +1,5 @@
+#!/usr/bin/python2.7
+
 #Minebot
 #GPL and all that
 # - espes
@@ -8,6 +10,8 @@ import time
 import urllib
 import logging
 from collections import defaultdict
+from collections import Counter
+
 from twisted.internet import reactor, protocol
 from twisted.python import log
 
@@ -20,7 +24,7 @@ from settings import *
 class MCBaseClientProtocol(protocol.Protocol):
     def sendPacked(self, mtype, *args):
         fmt = PACKET_FORMATS[mtype]
-        
+
         #self.transport.write(chr(mtype) + fmt.encode(*args))
         reactor.callFromThread(self.transport.write, chr(mtype) + fmt.encode(*args))
     
@@ -46,7 +50,6 @@ class MCBaseClientProtocol(protocol.Protocol):
         self.counter = 0
         self.lastCountTime = time.time()
         self.totalData = 0
-        from collections import Counter
         self.packetCounts = Counter()
 
     def connectionLost(self, reason):
@@ -67,32 +70,35 @@ class MCBaseClientProtocol(protocol.Protocol):
                 logging.error("invalid packet type - 0x%x %r %r" % (packetType,
                     len(self.buffer), self.buffer))
                 logging.error("last 0x%x" % (self.lastPacket,))
-                self.transport.loseConnection()
+                #self.transport.loseConnection()
                 return
             
             try:
+                #format = PACKET_FORMATS[PACKET_NEW]
                 parts = list(format.decode(parseBuffer) or [])
             except IncompleteDataError:
                 break
+                #pass
             self.buffer = parseBuffer.peek()
             
             
             #interesting benchmark stuffs
-            self.packetCounts[packetType] += 1
-            self.counter += 1
-            if self.counter % 1000 == 0:
-                d = time.time()-self.lastCountTime
-                logging.debug("1000 in %r - %r packets/s - %r kB/s" % (d, 1000/d, self.totalData/1000/d))
-                logging.debug(repr(self.packetCounts.most_common(5)))
-                self.lastCountTime = time.time()
-                self.totalData = 0
-                self.packetCounts.clear()
+            #self.packetCounts[packetType] += 1
+            #self.counter += 1
+            #if self.counter % 1000 == 0:
+            #    d = time.time()-self.lastCountTime
+            #    logging.debug("1000 in %r - %r packets/s - %r kB/s" % (d, 1000/d, self.totalData/1000/d))
+            #    logging.debug(repr(self.packetCounts.most_common(5)))
+            #    self.lastCountTime = time.time()
+            #    self.totalData = 0
+            #    self.packetCounts.clear()
             
             self.lastPacket = packetType
             
             for handler in self.packetHandlers[packetType]:
                 try:
                     ret = handler(parts)
+                    #logging.info(parts)
                     if ret == False:
                         return
                 except Exception as ex:
@@ -101,9 +107,11 @@ class MCBaseClientProtocol(protocol.Protocol):
     def _handleKeepAlive(self, parts):
         id, = parts
         self.sendPacked(PACKET_KEEPALIVE, id)
+#        logging.info("handlekeepalive")
     def _handleLogin(self, parts):
         id, name, mapSeed, mode, dimension, unk, height, plaers = parts
         logging.info("Server login %r" % (parts,))
+        pass
     def _handleHandshake(self, parts):
         serverId, = parts
 
@@ -127,7 +135,8 @@ class MCBaseClientProtocol(protocol.Protocol):
         
             logging.info("Done")
 
-        self.sendPacked(PACKET_LOGIN, 17, self.factory.username, 0, 0, 0, 0, 0, 0)
+        self.sendPacked(PACKET_LOGIN, 22, self.factory.username, 0, 0, 0, 0, 0, 0)
+
     def _handleChat(self, parts):
         message, = parts
         logging.info("Chat\t%r" % message)

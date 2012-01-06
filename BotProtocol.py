@@ -12,7 +12,7 @@ from MCProtocol import MCBaseClientProtocol
 class BotProtocol(MCBaseClientProtocol):
     def connectionMade(self):
         MCBaseClientProtocol.connectionMade(self)
-        
+        logging.info("connectionmade")
         self.client = BotClient(self, self.factory.botname)
         
         if self.factory.interfaceNamespace is not None:
@@ -27,6 +27,8 @@ class BotFactory(protocol.ClientFactory):#ReconnectingClientFactory
     protocol = BotProtocol
 
     def __init__(self, username, sessionId, botname=None, interfaceNamespace=None):
+        logging.info("botfactory")
+
         self.username = username
         self.sessionId = sessionId
 
@@ -39,6 +41,7 @@ class BotFactory(protocol.ClientFactory):#ReconnectingClientFactory
 
     def clientConnectionFailed(self, connector, reason):
         logging.error("Connection failed.")
+        logging.info(reason)
         if reactor.running: reactor.stop()
 
     def clientConnectionLost(self, connector, reason):

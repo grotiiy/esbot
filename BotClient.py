@@ -347,7 +347,7 @@ class BotClient(object):
             else:
                 logging.error("couldn't find %r" % followName)
                 #self.say("I'm afraid I cannot do that, %s" % name)
-        fetchMatch = re.match(r"(?:gimm?eh?|get meh?)\s+(?:(?:a|(?P<count>\d+))\s+)?(?P<item>[a-z0-9\-]+)\s*", command,
+        fetchMatch = re.match(r"(?:v?eh|get meh?)\s+(?:(?:a|(?P<count>\d+))\s+)?(?P<item>[a-z0-9\-]+)\s*", command,
             re.IGNORECASE)
         if fetchMatch:
             player = self.getPlayerByName(name)
@@ -389,7 +389,7 @@ class BotClient(object):
         elif command.lower() == "respawn" or command.lower() == "spawn":
             self.commandQueue = []
             self.protocol.sendPacked(PACKET_RESPAWN, 0, 0, 0, 0, 0)
-        elif command.lower() == "purge inventory":
+        elif command.lower() == "p":
             self.queueCommand(self.playerInventory.command_purge())
     
     def say(self, stuff):
@@ -486,8 +486,9 @@ class BotClient(object):
         self.protocol.sendPacked(PACKET_PLAYERPOSITIONLOOK, x, y, stance, z, rotation, pitch, 1)
 
     def _handleMobSpawn(self, parts):
-        entityId, type, x, y, z, rotation, pitch, metaData = parts
-        self.entities[entityId] = Mob(entityId, Point(x/32, y/32, z/32), type)
+        #entityId, type, x, y, z, rotation, pitch, metaData = parts
+        #self.entities[entityId] = Mob(entityId, Point(x/32, y/32, z/32), type)
+        pass
     def _handleNamedEntitySpawn(self, parts):
         entityId, name, x, y, z, rotation, pitch, item = parts
         self.entities[entityId] = Player(entityId, Point(x/32, y/32, z/32), name)

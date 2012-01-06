@@ -13,13 +13,23 @@ class Format(object):
     def decode(self, dataBuffer):
         for char in self.format:
             if char == "S": # minecraft string
-                length, = dataBuffer.readStruct("!h")
-                yield unicode(dataBuffer.read(length*2), "utf_16_be")
+                try:
+                    length, = dataBuffer.readStruct("!h")
+                    #yield unicode(dataBuffer.read(length*2), "utf_16_be")
+                    yield unicode(dataBuffer.read(length*2),"utf_16_be")
+                except:
+                    pass
             elif char == "8": # minecraft string8
-                length, = dataBuffer.readStruct("!h")
-                yield dataBuffer.read(length)
+                try:
+                    length, = dataBuffer.readStruct("!h")
+                    yield dataBuffer.read(length)
+                except:
+                    pass
             elif char == "M": # hack
-                yield tuple(EntityMetadataFormat().decode(dataBuffer))
+                try:
+                    yield tuple(EntityMetadataFormat().decode(dataBuffer))
+                except:
+                    pass
             else:
                 res, = dataBuffer.readStruct("!"+char)
                 yield res
