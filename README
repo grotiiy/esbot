@@ -1,3 +1,6 @@
+As you can see, This is a fork of https://github.com/espes/esbot. I just wanted to make it work with Minecraft 1.0 Servers. This fork combines lots of dirty hacks and removed features, so don't expect everything to work. Actually you can consider yourself lucky if it even logs in.
+
+Original message from espes:
 Hey look, I programmed myself a friend.
 
 run with client.py username server port [botname]
